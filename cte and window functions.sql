@@ -103,13 +103,31 @@ with order_revenue as (
 	join products as p on oi.product_id = p.product_id
 ),
 month_revenue as (
-select orderdate, sum(revenue)
-from order_revenue
-group by orderdate
-order by orderdate asc
+	select orderdate, sum(revenue)
+	from order_revenue
+	group by orderdate
+	order by orderdate asc
 )
 select *
 from month_revenue;
+
+#------------------------------------------------------------------
+
+with revenues as (
+  select customer_name, o.order_id, (quantity * price) as revenue
+  from customers as c
+  join orders as o on c.customer_id = o.customer_id
+  join order_items as oi on o.order_id = oi.order_id
+  join products as p on oi.product_id = p.product_id
+),
+total_revenues as (
+select customer_name, sum(revenue) as total_revenue, count(distinct order_id) as num_orders
+from revenues
+group by customer_name
+)
+select *, (total_revenue / num_orders) as avg_order_value
+from total_revenues
+order by total_revenue desc 
 
 
 
